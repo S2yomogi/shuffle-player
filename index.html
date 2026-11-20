@@ -32,16 +32,21 @@ button {
   font-weight: bold;
   cursor: pointer;
 }
+button:disabled {
+  opacity: 0.4;
+}
 </style>
 </head>
 <body>
 
 <h2>🎵 SHUFFLE PLAY</h2>
 <div id="player"></div>
-<button id="playButton" onclick="startShuffle()" disabled>
-  ▶ SHUFFLE PLAY
+
+<button id="playButton" disabled onclick="startShuffle()">
+▶ SHUFFLE PLAY
 </button>
-<p id="status">Loading...</p>
+
+<p id="status">YouTubeプレイヤー接続中...</p>
 
 <script>
 let player;
@@ -49,7 +54,7 @@ let ready = false;
 let shuffled = false;
 
 const playlistId =
-  "PLqPIA3o75lVWnQyR2-Mzywe0MiP1zXmC_";
+"PLqPIA3o75lVWnQyR2-Mzywe0MiP1zXmC_";
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player("player", {
@@ -57,24 +62,50 @@ function onYouTubeIframeAPIReady() {
     height: "360",
     playerVars: {
       playsinline: 1,
-      controls: 1
+      origin: window.location.origin
     },
     events: {
-      onReady: function() {
-        player.cuePlaylist({
+      onReady: function(event) {
+        document.getElementById("status").textContent =
+          "プレイヤー接続完了！再生リスト読み込み中...";
+
+        event.target.cuePlaylist({
           listType: "playlist",
-          list: playlistId
+          list: playlistId,
+          index: 0
         });
       },
+
       onStateChange: function(event) {
-        if (event.data === YT.PlayerState.CUED && !shuffled) {
+        if (event.data === 5 && !shuffled) {
           player.setShuffle(true);
           shuffled = true;
           ready = true;
+
           document.getElementById("playButton").disabled = false;
           document.getElementById("status").textContent =
-            "シャッフル準備完了！";
+            "シャッフル準備完了！再生ボタンを押してね🎵";
         }
+
+        if (event.data === 1) {
+          document.getElementById("status").textContent =
+            "Now Playing 🎵";
+        }
+      },
+
+      onError: function(event) {
+        const messages = {
+          2: "再生リストの指定を確認してね",
+          5: "動画の再生に対応していない状態です",
+          100: "動画が削除済み、または非公開です",
+          101: "この動画は埋め込み再生できません",
+          150: "この動画は埋め込み再生できません",
+          153: "ブラウザの接続情報を確認できません"
+        };
+
+        document.getElementById("status").textContent =
+          "エラー " + event.data + "：" +
+          (messages[event.data] || "読み込みエラー");
       }
     }
   });
@@ -83,8 +114,6 @@ function onYouTubeIframeAPIReady() {
 function startShuffle() {
   if (ready) {
     player.playVideo();
-    document.getElementById("status").textContent =
-      "Now Playing 🎵";
   }
 }
 </script>
