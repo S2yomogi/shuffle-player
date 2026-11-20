@@ -69,11 +69,11 @@ function onYouTubeIframeAPIReady() {
         document.getElementById("status").textContent =
           "プレイヤー接続完了！再生リスト読み込み中...";
 
-        event.target.cuePlaylist({
-          listType: "playlist",
-          list: playlistId,
-          index: 0
-        });
+        event.target.loadPlaylist({
+  listType: "playlist",
+  list: playlistId,
+  index: 0
+});
       },
 
       onStateChange: function(event) {
