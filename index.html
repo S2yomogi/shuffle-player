@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yomogi Shuffle Player</title>
+<style>
+body {
+  background: #111;
+  color: white;
+  font-family: sans-serif;
+  text-align: center;
+  padding: 30px 15px;
+}
+#player {
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 16 / 9;
+  margin: 20px auto;
+}
+#player iframe {
+  width: 100%;
+  height: 100%;
+}
+button {
+  padding: 14px 32px;
+  border: 0;
+  border-radius: 8px;
+  background: white;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<h2>🎵 SHUFFLE PLAY</h2>
+<div id="player"></div>
+<button id="playButton" onclick="startShuffle()" disabled>
+  ▶ SHUFFLE PLAY
+</button>
+<p id="status">Loading...</p>
+
+<script>
+let player;
+let ready = false;
+let shuffled = false;
+
+const playlistId =
+  "PLqPIA3o75lVWnQyR2-Mzywe0MiP1zXmC_";
+
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player("player", {
+    width: "640",
+    height: "360",
+    playerVars: {
+      playsinline: 1,
+      controls: 1
+    },
+    events: {
+      onReady: function() {
+        player.cuePlaylist({
+          listType: "playlist",
+          list: playlistId
+        });
+      },
+      onStateChange: function(event) {
+        if (event.data === YT.PlayerState.CUED && !shuffled) {
+          player.setShuffle(true);
+          shuffled = true;
+          ready = true;
+          document.getElementById("playButton").disabled = false;
+          document.getElementById("status").textContent =
+            "シャッフル準備完了！";
+        }
+      }
+    }
+  });
+}
+
+function startShuffle() {
+  if (ready) {
+    player.playVideo();
+    document.getElementById("status").textContent =
+      "Now Playing 🎵";
+  }
+}
+</script>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+</body>
+</html>
